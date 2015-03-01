@@ -14,6 +14,11 @@
 #define PRU_EVTOUT_0    3        // the event number that is sent back
 
 START:
+
+//	MOV 	r0, 0x10101010
+//	MOV 	r1, 0x00000000 
+//	SBBO	r0, r1 ,0 ,4
+
 	MOV 	r0, DELAY
 
 MAINLOOP:
