@@ -39,8 +39,9 @@ SAMPD:
         SUB     r0, r0, 1        // Decrement REG1 by 1
         QBNE    SAMPD, r0, 0   // Loop to SAMPDELAY, unless REG0=0
 
-        QBBC    MAINLOOP, r31.t0 // is the button pressed? If not, loop	
-
+//        QBBC    MAINLOOP, r31.t0 // is the button pressed? If not, loop	
+	QBA 	MAINLOOP
+	
 END:                             // notify the calling app that finished
 	MOV	R31.b0, PRU0_R31_VEC_VALID | PRU_EVTOUT_0
 	HALT                     // halt the pru program

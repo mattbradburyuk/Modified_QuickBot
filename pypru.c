@@ -36,7 +36,7 @@
 static PyObject* start_up_pru(PyObject* self, PyObject* args);
 static PyObject* stop_pru(PyObject* self, PyObject* args);
 static PyObject* get_pru_data(PyObject* self, PyObject* args);
-int read_pru_memory(char* dataArray);
+int read_pru_memory(char* dataArray_0, char* data_array_1);
 
 
 
@@ -104,37 +104,53 @@ static PyObject* stop_pru(PyObject* self, PyObject* args)
 static PyObject* get_pru_data(PyObject* self, PyObject* args)
 {
 	// Allocate a C array (c_arr) to hold contents of Pru memory, obtained via read_pru_memory()
-        char *c_arr;
+        char *c_arr_0, *c_arr_1;
 	int current_mem_loc;
-	c_arr = malloc(sizeof(char)*4096);
-        current_mem_loc = read_pru_memory(c_arr);
+	c_arr_0 = malloc(sizeof(char)*4096);
+	c_arr_1 = malloc(sizeof(char)*4096);
+        current_mem_loc = read_pru_memory(c_arr_0,c_arr_1);
 
 //        printf("current memory location: %x\n",current_mem_loc);
 	
 	// Create a python array (p_arr) consisting of doubles to store the data from c_arr
         PyArrayObject* p_arr;
-        int dims[1];
-        dims[0] = MAP_SIZE;
-        p_arr = (PyArrayObject*) PyArray_FromDims(1, dims, 'i');
+        int dims[2];
+        dims[0] = 2;
+	dims[1] = MAP_SIZE;
+        p_arr = (PyArrayObject*) PyArray_FromDims(2, dims, 'i');
         if(!p_arr) 
 	{
 		printf("p_arr not created\n");		
 		return 0;
 	}
 
+	printf("number of dimensions: %d\n", PyArray_NDIM(p_arr));
+
 	// Create a pointer to the data in the p_arr (p_arr_data) and transfer data from  c_arr to p_arr_data
 	int  *p_arr_data;
         p_arr_data = (int*)p_arr->data;
+
+	printf("ptr to [0,0]: %p\n" , PyArray_GETPTR2(p_arr,0,0));
+	printf("ptr to [0,1]: %p\n" , PyArray_GETPTR2(p_arr,0,1));
+	printf("ptr to [1,0]: %p\n" , PyArray_GETPTR2(p_arr,1,0));
+	printf("ptr to [1,1]: %p\n" , PyArray_GETPTR2(p_arr,1,1));
+
 
 	p_arr_data[0] = current_mem_loc;
 	p_arr_data[1] = 0xFFFFFFFF;
 	p_arr_data[2] = 0xFFFFFFFF;
 	p_arr_data[3] = 0xFFFFFFFF;
+	p_arr_data[0 + MAP_SIZE] = current_mem_loc;
+	p_arr_data[1 + MAP_SIZE] = 0xFFFFFFFF;
+	p_arr_data[2 + MAP_SIZE] = 0xFFFFFFFF;
+	p_arr_data[3 + MAP_SIZE] = 0xFFFFFFFF;
 
         int i;
         for(i=4; i<MAP_SIZE; ++i) 
 	{
-		p_arr_data[i] = c_arr[i];	
+		p_arr_data[i] = c_arr_0[i];	
+		p_arr_data[i + MAP_SIZE] = c_arr_1[i];
+
 	}
 //	printf("*******************************************************************\n");
 /*
@@ -144,14 +160,15 @@ static PyObject* get_pru_data(PyObject* self, PyObject* args)
 	}
 */
 	// free c_arr
-	free(c_arr);
+	free(c_arr_0);
+	free(c_arr_1);
 
 	// return the python array (p_arr)
         return PyArray_Return(p_arr); 
 }
 
 
-int read_pru_memory(char* dataArray)
+int read_pru_memory(char* dataArray_0, char* dataArray_1)
 {
         // declare variables
 
@@ -183,20 +200,35 @@ int read_pru_memory(char* dataArray)
 	int i;
 	int temp;
         for(i = 4; i< MAP_SIZE; i++)
+
         {
                 rel_addr = virt_addr + i;
                 temp = *((char *) rel_addr );  
-                if(temp >0)
+                if(temp == 0)
                 {
-                        dataArray[i] = 1;
-                }else
+                        dataArray_0[i] = 0;
+                        dataArray_1[i] = 0;
+		}else if (temp == 1)
+		{
+                        dataArray_0[i] = 1;
+                        dataArray_1[i] = 0;
+                }else if (temp == 2)
                 {
-                        dataArray[i] = 0;
-                }
-//                printf("dataArray[%x]: %x\n", i, dataArray[i]);
+                        dataArray_0[i] = 0;
+                        dataArray_1[i] = 1;
+                }else if (temp == 3)
+                { 
+		        dataArray_0[i] = 1;
+                        dataArray_1[i] = 1;
+		}else
+		{
+			printf("error");
+		}
 
+//                printf("dataArray[%x]: %x\n", i, dataArray[i]);
+	}
 	close(fd);
-        }
+        
         return current_mem_loc;
 }
 
