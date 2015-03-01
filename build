@@ -7,5 +7,5 @@ pasm -b e_reader.p
 g++ e_reader.cpp GPIO.cpp -o e_reader -lpthread -lprussdrv
 
 
-
+gcc -shared -o pypru.so -I/usr/include/python2.7 -fPIC pypru.c
 

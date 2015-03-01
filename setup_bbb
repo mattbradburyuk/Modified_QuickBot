@@ -1,0 +1,8 @@
+#!/bin/sh
+
+cd /lib/firmware/
+echo e_reader > $SLOTS  
+cat $SLOTS
+cat $PINS | grep 'pin 100'
+cat $PINS | grep 'pin 101'
+cat $PINS | grep 'pin 102'

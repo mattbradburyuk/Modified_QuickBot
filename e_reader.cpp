@@ -1,4 +1,4 @@
-/** Program to set up and read encoder values from Quickbot whel encoders 
+/** Program to set up and read encoder values from Quickbot wheel encoders 
 * uses GPIO c++ files developed by Derek Molloy from  Exploring BeagleBone book
 * API descibed at: http://processors.wiki.ti.com/index.php/PRU_Linux_Application_Loader_API_Guide
 */
@@ -20,10 +20,6 @@ int main (void)
       printf("You must run this program as root. Exiting.\n");
       exit(EXIT_FAILURE);
    }
-
-//	GPIO outGPIO(30), inGPIO(31);
-//	outGPIO.setDirection(OUTPUT);
-//	inGPIO.setDirection(INPUT);
 
    // Initialize structure used by prussdrv_pruintc_intc
    // PRUSS_INTC_INITDATA is found in pruss_intc_mapping.h
