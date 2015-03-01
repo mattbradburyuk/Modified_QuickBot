@@ -19,13 +19,13 @@ START:
 
 	MOV 	r0, 0x0		// Set SAMPDELAY counter to 0
 	MOV 	r1, DELAY	// Set SAMPDELAY constant value 
-	MOV	r2, 0x04	// Set latest sample address to 3
+	MOV	r2, 0x04	// Set latest sample address to 8
 	MOV	r3, 0x00000000	// Address to track latest sample address	
 
 
 MAINLOOP:
 	ADD 	r2, r2, 1 	// increment sample counter
-	QBEQ	RESET, r2.b1, 1
+	QBEQ	RESET, r2.b1, 8
 
 
 
