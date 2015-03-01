@@ -35,8 +35,10 @@ class Qb_read_test():
 	prevBufferLoc = 0
 
 	#ticks
-	prevLastTick = 0;
-	runningAverage = 0;
+	prevLastTick_0 = 0;
+	prevLastTick_1 = 0;
+	runningAverage_0 = 0;
+	runningAverage_1 = 0;
 
 	# State Encoder
     	encTime = [0.0, 0.0]  # Last time encoders were read
@@ -84,22 +86,24 @@ class Qb_read_test():
 
 		#update bufferLoc
 		self.prevBufferLoc =  self.bufferLoc
-		self.bufferLoc = buffer[0]
+		self.bufferLoc = buffer[0,0]
 
 		# get new entries in buffer
 		if self.bufferLoc > self.prevBufferLoc:
-#			print 'forwards from: ' + str(self.prevBufferLoc) +' to: ' + str(self.bufferLoc)
-			newEntries = buffer[self.prevBufferLoc: self.bufferLoc]
+			print 'forwards from: ' + str(self.prevBufferLoc) +' to: ' + str(self.bufferLoc)
+			newEntries_0 = buffer[0,self.prevBufferLoc: self.bufferLoc]
+			newEntries_1 = buffer[1,self.prevBufferLoc: self.bufferLoc]
 		else:
-#			print 'backwards from: ' + str(self.prevBufferLoc) +' back to: ' + str(self.bufferLoc)
-			newEntries = np.concatenate(( buffer[self.prevBufferLoc:4096] , buffer[4:self.bufferLoc] ) , axis=1)
+			print 'backwards from: ' + str(self.prevBufferLoc) +' back to: ' + str(self.bufferLoc)
+			newEntries_0 = np.concatenate(( buffer[0,self.prevBufferLoc:4096] , buffer[0,4:self.bufferLoc] ) , axis=1)
+			newEntries_1 = np.concatenate(( buffer[1,self.prevBufferLoc:4096] , buffer[1,4:self.bufferLoc] ) , axis=1)
 			
 		
 		# update times
 
 		# pru predicted:
 		self.pruPrevTime = self.pruCurrentTime
-		self.pruCurrentTime = self.pruPrevTime + len(newEntries)*0.0001
+		self.pruCurrentTime = self.pruPrevTime + len(newEntries_0)*0.0001
 		self.pruTotalTime = self.pruCurrentTime - self.sysStartTime
 		
 		# system actual
@@ -115,19 +119,39 @@ class Qb_read_test():
 #		print 'sysTotalTime: ' + str(self.sysTotalTime)
 #		print 'sys to pru: ' + str(sysToPru)
 
-		# calculate number of ticks 1->0 qnd 0->1 in newEntries
-		ticks = np.diff(newEntries)
+		# 0: calculate number of ticks 1->0 qnd 0->1 in newEntries
+		ticks = np.diff(newEntries_0)
 		ticks = abs(ticks)
 		ticks = sum(ticks)
-		if self.prevLastTick != newEntries[0]: # catch ticks that go accross sets of samples
+		if self.prevLastTick_0 != newEntries_0[0]: # catch ticks that go accross sets of samples
 			ticks = ticks + 1
 
-		self.prevLastTick = newEntries[len(newEntries)-1]
+		self.prevLastTick_0 = newEntries_0[len(newEntries_0)-1]
 		
 		#calculate time elapsed for this set of samples		
 		timeElapsed = self.pruCurrentTime - self.pruPrevTime
-		tickVel = ticks / timeElapsed
+		tickVel_0 = ticks / timeElapsed
 
 		#create running average of tick vels over 5 readings
-		self.runningAverage = (self.runningAverage*4 + tickVel)/5
-		print 'tickVel: {:0.1f}'.format(tickVel) + ' runningAverage: {:0.1f}'.format(self.runningAverage)
+		self.runningAverage_0 = (self.runningAverage_0*4 + tickVel_0)/5
+		print 'tickVel_0: {:0.1f}'.format(tickVel_0) + ' runningAverage_0: {:0.1f}'.format(self.runningAverage_0)
+
+
+
+
+                # 1: calculate number of ticks 1->0 qnd 0->1 in newEntries
+                ticks = np.diff(newEntries_1)
+                ticks = abs(ticks)
+                ticks = sum(ticks)
+                if self.prevLastTick_1 != newEntries_1[0]: # catch ticks that go accross sets of samples
+                        ticks = ticks + 1
+
+                self.prevLastTick_1 = newEntries_0[len(newEntries_1)-1]
+
+                #calculate time elapsed for this set of samples         
+                timeElapsed = self.pruCurrentTime - self.pruPrevTime
+                tickVel_1 = ticks / timeElapsed
+
+                #create running average of tick vels over 5 readings
+                self.runningAverage_1 = (self.runningAverage_1*4 + tickVel_1)/5
+                print 'tickVel_1: {:0.1f}'.format(tickVel_1) + ' runningAverage_1: {:0.1f}'.format(self.runningAverage_1)

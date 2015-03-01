@@ -124,17 +124,17 @@ static PyObject* get_pru_data(PyObject* self, PyObject* args)
 		return 0;
 	}
 
-	printf("number of dimensions: %d\n", PyArray_NDIM(p_arr));
+//	printf("number of dimensions: %d\n", PyArray_NDIM(p_arr));
 
 	// Create a pointer to the data in the p_arr (p_arr_data) and transfer data from  c_arr to p_arr_data
 	int  *p_arr_data;
         p_arr_data = (int*)p_arr->data;
-
+/*
 	printf("ptr to [0,0]: %p\n" , PyArray_GETPTR2(p_arr,0,0));
 	printf("ptr to [0,1]: %p\n" , PyArray_GETPTR2(p_arr,0,1));
 	printf("ptr to [1,0]: %p\n" , PyArray_GETPTR2(p_arr,1,0));
 	printf("ptr to [1,1]: %p\n" , PyArray_GETPTR2(p_arr,1,1));
-
+*/
 
 	p_arr_data[0] = current_mem_loc;
 	p_arr_data[1] = 0xFFFFFFFF;
