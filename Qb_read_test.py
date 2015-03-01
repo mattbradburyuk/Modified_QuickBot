@@ -42,6 +42,12 @@ class Qb_read_test():
     	encPos = [0.0, 0.0]  # Last encoder tick position
     	encVel = [0.0, 0.0]  # Last encoder tick velocity
 
+	#pwm settings
+
+	pwm = [100, -100]
+        i = 0 #temp counters to test pwm sign changes
+        j = 0
+
     	# === Class Methods ===
     	# Constructor
     	def __init__(self):
@@ -74,7 +80,17 @@ class Qb_read_test():
 
 
 	def update(self):
+		self.temp_update_pwm()
 		self.readEncoderValues()
+
+	def temp_update_pwm(self):
+		
+		self.i = self.i+1
+		self.j = self.j+1	
+		self.pwm[0] = (self.i % 10)-5
+		self.pwm[1] = (self.j % 10) -5
+		print "pwm[{:d},{:d}]".format(self.pwm[0], self.pwm[1])
+
 
 	def readEncoderValues(self):
 #		print 'readEncoderValues'
@@ -133,6 +149,7 @@ class Qb_read_test():
                 
 		for side in range(0,2):
 
+			# calculate number of ticks in this sample
 			ticks = np.diff(newEntries[side])
 	                ticks = abs(ticks)
         	        ticks = sum(ticks)
@@ -147,7 +164,13 @@ class Qb_read_test():
 
 	                #create running average of tick vels over 5 readings
          	        self.runningAverage[side] = (self.runningAverage[side]*4 + self.tickVel[side])/5
-                	print 'tickVel[{:d}]: {:0.1f}'.format(side,self.tickVel[side]) + ' runningAverage[{:d}]: {:0.1f}'.format(side,self.runningAverage[side])
+#                	print 'tickVel[{:d}]: {:0.1f}'.format(side,self.tickVel[side]) + ' runningAverage[{:d}]: {:0.1f}'.format(side,self.runningAverage[side])
 
+			
 
-
+		        # set State Encoder
+		        self.encTime[side]  = 0.0 						# not required in modified QB program
+        		self.encPos[side] = self.encPos[side] + (ticks * np.sign(self.pwm[side]))  	# new  encoder tick position
+        		self.encVel[side] = self.runningAverage[side] * np.sign(self.pwm[side])	# new encoder tick velocity
+		
+                	print 'encPos[{:d}]: {:0.1f}'.format(side,self.encPos[side]) + ' encVel[{:d}]: {:0.1f}'.format(side,self.encVel[side])
