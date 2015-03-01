@@ -13,6 +13,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define TRUE 1
+#define FALSE 0
 
 // for reading the pru
 #include <errno.h>
@@ -199,8 +201,8 @@ int read_pru_memory(char* dataArray_0, char* dataArray_1)
 
 	int i;
 	int temp;
+	int error = FALSE;
         for(i = 4; i< MAP_SIZE; i++)
-
         {
                 rel_addr = virt_addr + i;
                 temp = *((char *) rel_addr );  
@@ -217,18 +219,22 @@ int read_pru_memory(char* dataArray_0, char* dataArray_1)
                         dataArray_0[i] = 0;
                         dataArray_1[i] = 1;
                 }else if (temp == 3)
-                { 
+                {
 		        dataArray_0[i] = 1;
                         dataArray_1[i] = 1;
 		}else
 		{
-			printf("error");
+			error = TRUE;
 		}
+
 
 //                printf("dataArray[%x]: %x\n", i, dataArray[i]);
 	}
+
+	if(error) printf("error memory locations do not contain 1s and 0s");
+
 	close(fd);
-        
+
         return current_mem_loc;
 }
 
