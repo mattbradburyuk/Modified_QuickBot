@@ -7,8 +7,10 @@
 
 #define INS_PER_US   200         // 5ns per instruction
 #define INS_PER_DELAY_LOOP 2     // two instructions per delay loop
-                                 // set up a 50ms delay
-#define DELAY  100 * 1000 * (INS_PER_US / INS_PER_DELAY_LOOP) 
+#define INS_PER_SAMPLE	7	// time take to perform sample
+
+                                 // delay required to set up a 0.1ms sample time (10 kHz)
+#define DELAY    100 * (INS_PER_US / INS_PER_DELAY_LOOP) - INS_PER_SAMPLE 
 
 #define PRU0_R31_VEC_VALID 32    // allows notification of program completion
 #define PRU_EVTOUT_0    3        // the event number that is sent back
@@ -23,6 +25,10 @@ START:
 
 MAINLOOP:
 	ADD 	r2, r2, 1 	// increment sample counter
+	QBEQ	RESET, r2.b1, 1
+
+
+
 	SBBO	r2, r3, 0, 4	// write sample counter to mem address 0x00000000
 	
 	MOV	r4, r31.b0	// read sample value into REG4
@@ -39,3 +45,9 @@ SAMPD:
 END:                             // notify the calling app that finished
 	MOV	R31.b0, PRU0_R31_VEC_VALID | PRU_EVTOUT_0
 	HALT                     // halt the pru program
+
+RESET:
+	MOV	r2, 0x03 	// reset back to start of sample buffer
+	QBA	MAINLOOP
+
+
