@@ -41,7 +41,6 @@ SAMPD:
 
         QBBC    MAINLOOP, r31.t0 // is the button pressed? If not, loop	
 
-
 END:                             // notify the calling app that finished
 	MOV	R31.b0, PRU0_R31_VEC_VALID | PRU_EVTOUT_0
 	HALT                     // halt the pru program
