@@ -28,30 +28,37 @@
 
 
 // returns an array
-static PyObject* tiny(PyObject* self, PyObject* args)  
-{ 
-        PyArrayObject* parr; 
-        int dims[1]; 
-        int i; 
-        char *xx; 
-	xx = malloc(sizeof(char)*4096); 
-        get_pru_data(xx);
+static PyObject* get_pru_data(PyObject* self, PyObject* args)
+{
 
-	int *data; 
+	// Allocate a C array (c_arr) to hold contents of Pru memory, obtained via read_pru_memory()
+        char *c_arr;
+	c_arr = malloc(sizeof(char)*4096);
+        read_pru_memory(c_arr);
 
-        dims[0] = 4096; 
-        parr = (PyArrayObject*) PyArray_FromDims(1, dims, 'i'); 
-        if(!parr) return 0; 
+	// Create a python array (p_arr) consisting of doubles to store the data from c_arr
+        PyArrayObject* p_arr;
+        int dims[1];
+        dims[0] = MAP_SIZE;
+        p_arr = (PyArrayObject*) PyArray_FromDims(1, dims, 'd');
+        if(!p_arr) return 0;
 
-        data = (int*) parr->data; 
-        for(i=0; i<5; ++i) 
-        data[i] = xx[i]; 
+	// Create a pointer to the data in the p_arr (p_arr_data) and transfer data from  c_arr to p_arr_data
+	double  *p_arr_data;
+        int i;
+        p_arr_data = (double*) p_arr->data;
+        for(i=0; i<5; ++i)
+        p_arr_data[i] = c_arr[i];
 
-        return PyArray_Return(parr); 
+	// free c_arr
+	free(c_arr);
+
+	// return the python array (p_arr)
+        return PyArray_Return(p_arr); 
 }
 
 
-int get_pru_data(char* dataArray)
+int read_pru_memory(char* dataArray)
 {
         // declare variables
 
@@ -88,8 +95,6 @@ int get_pru_data(char* dataArray)
 	int temp;
         dataArray[i]  = *((unsigned long *) virt_addr );
         printf("dataArray[%x]: %x\n", i, dataArray[i]);
-        
-
 
         for(i = 4; i< current_mem_loc; i++)
         {
@@ -104,16 +109,7 @@ int get_pru_data(char* dataArray)
                 }
                 printf("dataArray[%x]: %x\n", i, dataArray[i]);
         }
-
-
-//        free(buffer);
-
         return 1234;
-
-
-
-
-
 }
 
 
@@ -122,7 +118,7 @@ int get_pru_data(char* dataArray)
 
 static PyMethodDef functions[] =
 {
-        {"tiny", tiny, METH_VARARGS, "example"},
+        {"get_pru_data", get_pru_data, METH_VARARGS, "example"},
         {0, 0, 0, 0}
 };
 
