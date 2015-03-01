@@ -1,0 +1,11 @@
+#!/bin/sh
+pasm -b e_reader.p
+
+
+#gcc ledButton.c -o ledButton -lpthread -lprussdrv
+
+g++ e_reader.cpp GPIO.cpp -o e_reader -lpthread -lprussdrv
+
+
+
+
