@@ -1,3 +1,15 @@
+/* To do:
+
+- re name tiny()
+- sort out storage and passing of the current address variable
+- add switching on /off the pru
+- check memory management
+- add second  pru/ read both in one pru
+- add comments/ description
+
+*/
+
+
 #include <Python.h>
 #include <numpy/arrayobject.h>
 
