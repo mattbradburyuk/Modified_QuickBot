@@ -1,6 +1,5 @@
 # to do:
-# sort out time drifting from system clock - timer firing??
-# timer functions not working yet
+# add carry forward of previous sample value
 
 import numpy as np
 import pypru as pp
@@ -26,8 +25,8 @@ class Qb_read_test():
 
 
 	bufferLoc = 0
-	prevBufferLoc = 0
-
+	prevBufferLoc = 4	# initialise at start of sample data in buffer
+	
 	# State Encoder
     	encTime = [0.0, 0.0]  # Last time encoders were read
     	encPos = [0.0, 0.0]  # Last encoder tick position
@@ -49,8 +48,10 @@ class Qb_read_test():
 		self.sysStartTime = time.time() + adj
 		self.pruCurrentTime = self.sysStartTime
 
-		self.timeitStartTime = timeit.default_timer() + adj
-		self.ct2 = self.timeitStartTime
+
+		# double check timingn with timeit
+#		self.timeitStartTime = timeit.default_timer() + adj
+#		self.ct2 = self.timeitStartTime
 	
 		while RUN_FLAG is True:
 			self.update()
@@ -66,11 +67,11 @@ class Qb_read_test():
 		self.readEncoderValues()
 
 	def readEncoderValues(self):
-		print 'readEncoderValues'
+#		print 'readEncoderValues'
 		
 		buffer = pp.get_pru_data()
 
-		print 'len buffer:' + str(len(buffer))
+#		print 'len buffer:' + str(len(buffer))
 		
 		#update bufferLoc
 		self.prevBufferLoc =  self.bufferLoc
@@ -78,10 +79,10 @@ class Qb_read_test():
 
 		# get new entries in buffer
 		if self.bufferLoc > self.prevBufferLoc:
-			print 'forwards from: ' + str(self.prevBufferLoc) +' to: ' + str(self.bufferLoc)
+#			print 'forwards from: ' + str(self.prevBufferLoc) +' to: ' + str(self.bufferLoc)
 			newEntries = buffer[self.prevBufferLoc: self.bufferLoc]
 		else:
-			print 'backwards from: ' + str(self.prevBufferLoc) +' back to: ' + str(self.bufferLoc)
+#			print 'backwards from: ' + str(self.prevBufferLoc) +' back to: ' + str(self.bufferLoc)
 			newEntries = np.concatenate(( buffer[self.prevBufferLoc:4096] , buffer[4:self.bufferLoc] ) , axis=1)
 			
 		
@@ -97,19 +98,31 @@ class Qb_read_test():
 		self.sysTotalTime = self.sysCurrentTime - self.sysStartTime	
 
 		# timeit actual
-
-		self.timeitCurrentTime = timeit.default_timer()
-		self.timeitTotalTime = self.timeitCurrentTime - self.timeitStartTime
+#		self.timeitCurrentTime = timeit.default_timer()
+#		self.timeitTotalTime = self.timeitCurrentTime - self.timeitStartTime
 
 		# pru diferences
-
 		sysToPru  = self.sysTotalTime  - self.pruTotalTime
-		timeitToPru = self.timeitTotalTime - self.pruTotalTime
+#		timeitToPru = self.timeitTotalTime - self.pruTotalTime
 
-		print '******* Timings *******'
+#
+#		print '******* Timings *******'
+#		
+#		print 'pruTotalTime: ' + str(self.pruTotalTime)
+#		print 'sysTotalTime: ' + str(self.sysTotalTime)
+#		print 'timeitTotalTime: ' + str(self.timeitTotalTime)
+#		print 'sys to pru: ' + str(sysToPru)
+#		print 'timeit to pru: ' + str(timeitToPru) 
+#
+
+		ticks = np.diff(newEntries)
+		ticks = abs(ticks)
+		ticks = sum(ticks)
+
+#		print 'ticks: ' + str(ticks) 
 		
-		print 'pruTotalTime: ' + str(self.pruTotalTime)
-		print 'sysTotalTime: ' + str(self.sysTotalTime)
-		print 'timeitTotalTime: ' + str(self.timeitTotalTime)
-		print 'sys to pru: ' + str(sysToPru)
-		print 'timeit to pru: ' + str(timeitToPru) 
+		timeElapsed = self.pruCurrentTime - self.pruPrevTime
+
+		tickVel = ticks / timeElapsed
+
+		print 'tickVel: ' + str(tickVel)
