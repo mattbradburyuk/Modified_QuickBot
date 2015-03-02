@@ -8,7 +8,7 @@
 #define INS_PER_US   200         // 5ns per instruction
 #define INS_PER_DELAY_LOOP 2     // two instructions per delay loop
                                  // set up a 50ms delay
-#define DELAY  50 * 1000 * (INS_PER_US / INS_PER_DELAY_LOOP) 
+#define DELAY  100 * 1000 * (INS_PER_US / INS_PER_DELAY_LOOP) 
 
 #define PRU0_R31_VEC_VALID 32    // allows notification of program completion
 #define PRU_EVTOUT_0    3        // the event number that is sent back
@@ -27,10 +27,10 @@ MAINLOOP:
 	SBBO	r2, r3, 0, 4	// write sample counter to mem address 0x00000000
 
 	
-
-SAMPDELAY:
+	MOV	r0, r1
+SAMPD:
         SUB     r0, r0, 1        // Decrement REG1 by 1
-        QBNE    SAMPDELAY, r0, 0   // Loop to SAMPDELAY, unless REG0=0
+        QBNE    SAMPD, r0, 0   // Loop to SAMPDELAY, unless REG0=0
 
         QBBC    MAINLOOP, r31.t2 // is the button pressed? If not, loop	
 
