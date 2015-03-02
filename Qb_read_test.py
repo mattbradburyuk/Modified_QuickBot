@@ -1,8 +1,12 @@
 # to do:
-# add carry forward of previous sample value
+# add pwm direction to change velocity sign and direction of ticks increment
+# look at whether trigger for updated is timed correctly
+# add second encoder
+# add properties list
+
 
 import numpy as np
-import pypru as pp
+import pypru as pp 	# start_up_pru(), stop_pru(), get_pru_data()
 import threading
 import time
 import sys
@@ -18,18 +22,20 @@ class Qb_read_test():
 	# === Class Properties ===
     	# Parameters
     	
-	sampleTime = 20.0/1000.0
-	currentTime = 0.0
-	prevTime = 0.0
-	startTime = 0
+	# timing 
+	sampleTime = 20.0/1000.0	#sample time of the update function
+	pruCurrentTime = 0.0	# time of current last sample per pru
+	pruPrevTime = 0.0 	# time of previous last sample per pru
+	pruTotalTime = 0.0	# total time since pru started per pru
+	sysStartTime = 0.0	# system time when pru started
+	sysTotalTime = 0.0	# total time since pru started per system
+	
+	#buffer
+	bufferLoc = 4	 # initialise at start of sample data in buffer
+	prevBufferLoc = 0
 
-
-	bufferLoc = 0
-	prevBufferLoc = 4	# initialise at start of sample data in buffer
-
-
+	#ticks
 	prevLastTick = 0;
-
 	runningAverage = 0;
 
 	# State Encoder
@@ -76,8 +82,6 @@ class Qb_read_test():
 		
 		buffer = pp.get_pru_data()
 
-#		print 'len buffer:' + str(len(buffer))
-		
 		#update bufferLoc
 		self.prevBufferLoc =  self.bufferLoc
 		self.bufferLoc = buffer[0]
@@ -102,42 +106,28 @@ class Qb_read_test():
 		self.sysCurrentTime = time.time()
 		self.sysTotalTime = self.sysCurrentTime - self.sysStartTime	
 
-		# timeit actual
-#		self.timeitCurrentTime = timeit.default_timer()
-#		self.timeitTotalTime = self.timeitCurrentTime - self.timeitStartTime
-
 		# pru diferences
 		sysToPru  = self.sysTotalTime  - self.pruTotalTime
-#		timeitToPru = self.timeitTotalTime - self.pruTotalTime
 
-#
 #		print '******* Timings *******'
 #		
 #		print 'pruTotalTime: ' + str(self.pruTotalTime)
 #		print 'sysTotalTime: ' + str(self.sysTotalTime)
-#		print 'timeitTotalTime: ' + str(self.timeitTotalTime)
 #		print 'sys to pru: ' + str(sysToPru)
-#		print 'timeit to pru: ' + str(timeitToPru) 
-#
 
+		# calculate number of ticks 1->0 qnd 0->1 in newEntries
 		ticks = np.diff(newEntries)
 		ticks = abs(ticks)
 		ticks = sum(ticks)
-
-		
-		if self.prevLastTick != newEntries[0]:
+		if self.prevLastTick != newEntries[0]: # catch ticks that go accross sets of samples
 			ticks = ticks + 1
-			print 'tick at start'
 
 		self.prevLastTick = newEntries[len(newEntries)-1]
 		
-#		print 'ticks: ' + str(ticks) 
-		
+		#calculate time elapsed for this set of samples		
 		timeElapsed = self.pruCurrentTime - self.pruPrevTime
-
 		tickVel = ticks / timeElapsed
 
 		#create running average of tick vels over 5 readings
-
 		self.runningAverage = (self.runningAverage*4 + tickVel)/5
 		print 'tickVel: {:0.1f}'.format(tickVel) + ' runningAverage: {:0.1f}'.format(self.runningAverage)
