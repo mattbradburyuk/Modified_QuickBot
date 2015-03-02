@@ -137,10 +137,10 @@ static PyObject* get_pru_data(PyObject* self, PyObject* args)
 		p_arr_data[i] = c_arr[i];	
 	}
 //	printf("*******************************************************************\n");
-
-/*	for (i= 0;i < current_mem_loc;i++)
+/*
+	for (i= 0;i < MAP_SIZE;i++)
 	{
-		printf("p_arr_data[%d]: %d\n",i, p_arr_data[i]);
+		printf("p_arr_data[%x]: %d\n",(i/4), p_arr_data[i]);
 	}
 */
 	// free c_arr
@@ -182,7 +182,7 @@ int read_pru_memory(char* dataArray)
 
 	int i;
 	int temp;
-        for(i = 4; i< current_mem_loc; i++)
+        for(i = 4; i< MAP_SIZE; i++)
         {
                 rel_addr = virt_addr + i;
                 temp = *((char *) rel_addr );  

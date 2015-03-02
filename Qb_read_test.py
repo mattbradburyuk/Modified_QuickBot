@@ -67,10 +67,8 @@ class Qb_read_test():
 		if self.bufferLoc > self.prevBufferLoc:
 			print 'forwards from: ' + str(self.prevBufferLoc) +' to: ' + str(self.bufferLoc)
 			newEntries = buffer[self.prevBufferLoc: self.bufferLoc]
-
-
 		else:
 			print 'backwards from: ' + str(self.prevBufferLoc) +' back to: ' + str(self.bufferLoc)
-			newEntries = np.concatenate(( buffer[self.prevBufferLoc:4096] , buffer[0:self.bufferLoc] ) , axis=1)
+			newEntries = np.concatenate(( buffer[self.prevBufferLoc:4096] , buffer[4:self.bufferLoc] ) , axis=1)
 
 		print newEntries
