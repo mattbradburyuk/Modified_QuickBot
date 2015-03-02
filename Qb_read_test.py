@@ -26,7 +26,12 @@ class Qb_read_test():
 
 	bufferLoc = 0
 	prevBufferLoc = 4	# initialise at start of sample data in buffer
-	
+
+
+	prevLastTick = 0;
+
+	runningAverage = 0;
+
 	# State Encoder
     	encTime = [0.0, 0.0]  # Last time encoders were read
     	encPos = [0.0, 0.0]  # Last encoder tick position
@@ -119,10 +124,20 @@ class Qb_read_test():
 		ticks = abs(ticks)
 		ticks = sum(ticks)
 
+		
+		if self.prevLastTick != newEntries[0]:
+			ticks = ticks + 1
+			print 'tick at start'
+
+		self.prevLastTick = newEntries[len(newEntries)-1]
+		
 #		print 'ticks: ' + str(ticks) 
 		
 		timeElapsed = self.pruCurrentTime - self.pruPrevTime
 
 		tickVel = ticks / timeElapsed
 
-		print 'tickVel: ' + str(tickVel)
+		#create running average of tick vels over 5 readings
+
+		self.runningAverage = (self.runningAverage*4 + tickVel)/5
+		print 'tickVel: {:0.1f}'.format(tickVel) + ' runningAverage: {:0.1f}'.format(self.runningAverage)
