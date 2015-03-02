@@ -15,24 +15,22 @@
 
 START:
 
-	MOV 	r0, 0x10101010
-	MOV 	r1, 0x00000000 
-	SBBO	r0, r1 ,0 ,4
+	MOV 	r0, 0x0		// Set SAMPDELAY counter to 0
+	MOV 	r1, DELAY	// Set SAMPDELAY constant value 
+	MOV	r2, 0x04	// Set Sample counter to 0
+	MOV	r3, 0x00000000	// Set sample counter address	
+	MOV	r4, 10		// pretend sample
 
-	MOV 	r0, DELAY
 
 MAINLOOP:
-	SET 	r30.t0
-	MOV	r1, r0
-DELAYON:
-        SUB     r1, r1, 1        // Decrement REG1 by 1
-        QBNE    DELAYON, r1, 0   // Loop to DELAYON, unless REG1=0
-LEDOFF:
-	CLR	r30.t0
-        MOV     r1, r0        // Reset REG1 to the length of the delay
-DELAYOFF:
-        SUB     r1, r1, 1        // decrement REG1 by 1
-        QBNE    DELAYOFF, r1, 0  // Loop to DELAYOFF, unless REG0=0
+	ADD 	r2, r2, 1 	// increment sample counter
+	SBBO	r2, r3, 0, 4	// write sample counter to mem address 0x00000000
+
+	
+
+SAMPDELAY:
+        SUB     r0, r0, 1        // Decrement REG1 by 1
+        QBNE    SAMPDELAY, r0, 0   // Loop to SAMPDELAY, unless REG0=0
 
         QBBC    MAINLOOP, r31.t2 // is the button pressed? If not, loop	
 
