@@ -1,9 +1,13 @@
+# to do:
+# sort out time drifting from system clock - timer firing??
+# timer functions not working yet
+
 import numpy as np
 import pypru as pp
 import threading
 import time
 import sys
-
+import timeit
 
 RUN_FLAG = True
 
@@ -16,7 +20,10 @@ class Qb_read_test():
     	# Parameters
     	
 	sampleTime = 20.0/1000.0
-	currentTime = 0.0;
+	currentTime = 0.0
+	prevTime = 0.0
+	startTime = 0
+
 
 	bufferLoc = 0
 	prevBufferLoc = 0
@@ -37,9 +44,14 @@ class Qb_read_test():
 		global RUN_FLAG
 
 		pp.start_up_pru()
-		self.startTime = time.time()
-		self.currentTime = self.startTime
-				
+
+		adj = 0.014; 
+		self.sysStartTime = time.time() + adj
+		self.pruCurrentTime = self.sysStartTime
+
+		self.timeitStartTime = timeit.default_timer() + adj
+		self.ct2 = self.timeitStartTime
+	
 		while RUN_FLAG is True:
 			self.update()
 			time.sleep(self.sampleTime)
@@ -64,11 +76,40 @@ class Qb_read_test():
 		self.prevBufferLoc =  self.bufferLoc
 		self.bufferLoc = buffer[0]
 
+		# get new entries in buffer
 		if self.bufferLoc > self.prevBufferLoc:
 			print 'forwards from: ' + str(self.prevBufferLoc) +' to: ' + str(self.bufferLoc)
 			newEntries = buffer[self.prevBufferLoc: self.bufferLoc]
 		else:
 			print 'backwards from: ' + str(self.prevBufferLoc) +' back to: ' + str(self.bufferLoc)
 			newEntries = np.concatenate(( buffer[self.prevBufferLoc:4096] , buffer[4:self.bufferLoc] ) , axis=1)
+			
+		
+		# update times
 
-		print newEntries
+		# pru predicted:
+		self.pruPrevTime = self.pruCurrentTime
+		self.pruCurrentTime = self.pruPrevTime + len(newEntries)*0.0001
+		self.pruTotalTime = self.pruCurrentTime - self.sysStartTime
+		
+		# system actual
+		self.sysCurrentTime = time.time()
+		self.sysTotalTime = self.sysCurrentTime - self.sysStartTime	
+
+		# timeit actual
+
+		self.timeitCurrentTime = timeit.default_timer()
+		self.timeitTotalTime = self.timeitCurrentTime - self.timeitStartTime
+
+		# pru diferences
+
+		sysToPru  = self.sysTotalTime  - self.pruTotalTime
+		timeitToPru = self.timeitTotalTime - self.pruTotalTime
+
+		print '******* Timings *******'
+		
+		print 'pruTotalTime: ' + str(self.pruTotalTime)
+		print 'sysTotalTime: ' + str(self.sysTotalTime)
+		print 'timeitTotalTime: ' + str(self.timeitTotalTime)
+		print 'sys to pru: ' + str(sysToPru)
+		print 'timeit to pru: ' + str(timeitToPru) 

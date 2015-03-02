@@ -194,6 +194,8 @@ int read_pru_memory(char* dataArray)
                         dataArray[i] = 0;
                 }
 //                printf("dataArray[%x]: %x\n", i, dataArray[i]);
+
+	close(fd);
         }
         return current_mem_loc;
 }
