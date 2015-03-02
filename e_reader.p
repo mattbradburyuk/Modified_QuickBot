@@ -17,22 +17,23 @@ START:
 
 	MOV 	r0, 0x0		// Set SAMPDELAY counter to 0
 	MOV 	r1, DELAY	// Set SAMPDELAY constant value 
-	MOV	r2, 0x04	// Set Sample counter to 0
-	MOV	r3, 0x00000000	// Set sample counter address	
-	MOV	r4, 10		// pretend sample
+	MOV	r2, 0x04	// Set latest sample address to 3
+	MOV	r3, 0x00000000	// Address to track latest sample address	
 
 
 MAINLOOP:
 	ADD 	r2, r2, 1 	// increment sample counter
 	SBBO	r2, r3, 0, 4	// write sample counter to mem address 0x00000000
-
+	
+	MOV	r4, r31.b0	// read sample value into REG4
+	SBBO	r4, r2, 0, 1	// write sample value to sample address counter
 	
 	MOV	r0, r1
 SAMPD:
         SUB     r0, r0, 1        // Decrement REG1 by 1
         QBNE    SAMPD, r0, 0   // Loop to SAMPDELAY, unless REG0=0
 
-        QBBC    MAINLOOP, r31.t2 // is the button pressed? If not, loop	
+        QBBC    MAINLOOP, r31.t0 // is the button pressed? If not, loop	
 
 
 END:                             // notify the calling app that finished
