@@ -1,7 +1,5 @@
 /* To do:
 
-- re name tiny()
-- sort out storage and passing of the current address variable
 - add switching on /off the pru
 - check memory management
 - add second  pru/ read both in one pru
@@ -9,12 +7,15 @@
 
 */
 
-
+// for intacting with python 
 #include <Python.h>
 #include <numpy/arrayobject.h>
 
 #include <stdio.h>
 #include <stdlib.h>
+
+
+// for reading the pru
 #include <errno.h>
 #include <fcntl.h>  //MB open(), close()#include <sys/mman.h> //MB mmap()
 #include <sys/types.h> // MB to define off_t ?? 
@@ -25,9 +26,82 @@
 #define MAP_MASK (MAP_SIZE - 1) // MB map that when bitwise AND'd to and address allow through just the offset to the base address, also AND to ~ MAP_MASK separates out the base address
 #define FATAL do { fprintf(stderr, "Error at line %d, file %s (%d) [%s]\n",  __LINE__, __FILE__, errno, strerror(errno)); exit(1); } while(0)
 
+// for starting and ending the pru
+#include </usr/include/prussdrv.h> // pru interface
+#include </usr/include/pruss_intc_mapping.h> // pru mapping info
+
+#define PRU_NUM 0   // using PRU0 for these examples
 
 
-// returns an array
+// declare functions - 
+static PyObject* start_up_pru(PyObject* self, PyObject* args);
+static PyObject* stop_pru(PyObject* self, PyObject* args);
+static PyObject* get_pru_data(PyObject* self, PyObject* args);
+int read_pru_memory(char* dataArray);
+
+
+
+// define functions callable from python
+
+static PyMethodDef functions[] =
+{
+        {"get_pru_data", get_pru_data, METH_VARARGS, "Gets data from pru"},
+        {"start_up_pru", start_up_pru, METH_VARARGS, "starts up pru"},
+        {"stop_pru", stop_pru, METH_VARARGS, "stops pru"},
+        {0, 0, 0, 0}
+};
+
+// define initalisation of the module
+
+PyMODINIT_FUNC initpypru(void) 
+{
+        import_array();
+        (void) Py_InitModule("pypru", functions); 
+}
+
+
+
+
+// start up the pru
+static PyObject* start_up_pru(PyObject* self, PyObject* args)
+{
+	   if(getuid()!=0)
+	   {
+	   	printf("You must run this program as root. Exiting.\n");
+	   	exit(EXIT_FAILURE);
+	   }
+
+	// Initialize structure used by prussdrv_pruintc_intc
+	// PRUSS_INTC_INITDATA is found in pruss_intc_mapping.h
+	tpruss_intc_initdata pruss_intc_initdata = PRUSS_INTC_INITDATA;
+
+	// Allocate and initialize memory
+	prussdrv_init ();
+	prussdrv_open (PRU_EVTOUT_0);
+
+   	// Map PRU's interrupts
+   	prussdrv_pruintc_init(&pruss_intc_initdata);
+
+   	// Load and execute the PRU program on the PRU
+   	prussdrv_exec_program (PRU_NUM, "./e_reader.bin");
+
+	Py_RETURN_NONE;
+
+}
+
+//stop the pru
+static PyObject* stop_pru(PyObject* self, PyObject* args)
+{
+   	// Disable PRU and close memory mappings
+   	prussdrv_pru_disable(PRU_NUM);
+   	prussdrv_exit ();
+   	Py_RETURN_NONE;;
+
+}
+
+
+
+// gets the pru memory dataand passes it to back to python as a numpy ndarray
 static PyObject* get_pru_data(PyObject* self, PyObject* args)
 {
 	// Allocate a C array (c_arr) to hold contents of Pru memory, obtained via read_pru_memory()
@@ -125,18 +199,3 @@ int read_pru_memory(char* dataArray)
         return current_mem_loc;
 }
 
-
-
-
-
-static PyMethodDef functions[] =
-{
-        {"get_pru_data", get_pru_data, METH_VARARGS, "example"},
-        {0, 0, 0, 0}
-};
-
-PyMODINIT_FUNC initpypru(void) 
-{
-        import_array();
-        (void) Py_InitModule("pypru", functions); 
-}
