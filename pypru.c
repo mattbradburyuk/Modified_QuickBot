@@ -1,6 +1,5 @@
 /* To do:
 
-- add switching on /off the pru
 - check memory management
 - add second  pru/ read both in one pru
 - add comments/ description
@@ -133,7 +132,7 @@ static PyObject* get_pru_data(PyObject* self, PyObject* args)
 	p_arr_data[3] = 0xFFFFFFFF;
 
         int i;
-        for(i=4; i<current_mem_loc; ++i) 
+        for(i=4; i<MAP_SIZE; ++i) 
 	{
 		p_arr_data[i] = c_arr[i];	
 	}
@@ -158,19 +157,19 @@ int read_pru_memory(char* dataArray)
 
         off_t target; 
 
-        printf("BB_MEM_LOC: %x\n", BBB_MEM_LOC);
+//        printf("BB_MEM_LOC: %x\n", BBB_MEM_LOC);
 
 	// MB opens memory area to read/write to referenced by fd
         int fd;
         if((fd = open("/dev/mem", O_RDWR | O_SYNC)) == -1) FATAL; 
-        printf("/dev/mem opened.\n"); 
+//        printf("/dev/mem opened.\n"); 
         fflush(stdout);
 
         // establish the base address (map_base) of /dev/mem which displays memory address BBB_MEM_LOC which equates to PRU Memory 
         void *map_base;
         map_base = mmap(0, MAP_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, BBB_MEM_LOC & ~MAP_MASK);
         if(map_base == (void *) -1) FATAL;
-        printf("Memory mapped at address %p.\n", map_base); 
+//        printf("Memory mapped at address %p.\n", map_base); 
         fflush(stdout);
 
 

@@ -1,7 +1,8 @@
-import pypru as p
-import numpy as np
+import sys
+import time
+from Qb_read_test import *
 
-a = p.get_pru_data()
+print "Running Qb_read_test"
 
-print a[0:100]
-print a.dtype
+QB = Qb_read_test()
+QB.run()
