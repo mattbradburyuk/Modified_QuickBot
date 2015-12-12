@@ -12,17 +12,24 @@
 
    /* This overlay uses the following resources */
    exclusive-use =
-         "P9.31", "P9.30", "pru0";
-
+         "P9.29", "P9.31", "pru0";
+//  "P8_14","P8_12","P8_16","P8_10","P9_16","P9_14"
    fragment@0 {
       target = <&am33xx_pinmux>;
       __overlay__ {
 
          pru_pru_pins: pinmux_pru_pru_pins {   // The PRU pin modes
             pinctrl-single,pins = <
-               0x194 0x26  // P9_29 pr1_pru0_pru_r31_1, MODE6 | INPUT | PRU
-               0x198 0x05  // P9_30 pr1_pru0_pru_r30_2, MODE5 | OUTPUT | PRU
-               0x190 0x26  // P9_31 pr1_pru0_pru_r31_0, MODE6 | INPUT | PRU
+
+//               0x028 0x07  // P8_14 GPIO_0_26, MODE7 | INPUT | pulldown 
+//               0x030 0x07  // P8_12 GPIO_1_12, MODE7 | INPUT | pulldown 
+//               0x038 0x07  // P8_16 GPIO_1_14, MODE7 | INPUT | pulldown 
+//               0x098 0x07  // P8_10 GPIO_2_4,  MODE7 | INPUT | pulldown 
+//               0x04c 0x07  // P9_16 GPIO_1_19, MODE7 | INPUT | pulldown 
+//               0x048 0x07  // P9_14 GPIO_1_18, MODE7 | INPUT | pulldown 
+
+               0x194 0x36  // P9_29 pr1_pru0_pru_r31_1, MODE6 | INPUT | pullup | PRU
+               0x190 0x36  // P9_31 pr1_pru0_pru_r31_0, MODE6 | INPUT | pullup | PRU
             >;
          };
       };

@@ -3,6 +3,11 @@
 cd /lib/firmware/
 echo e_reader > $SLOTS  
 cat $SLOTS
-cat $PINS | grep 'pin 100'
-cat $PINS | grep 'pin 101'
-cat $PINS | grep 'pin 102'
+cat $PINS | grep 'pin 10 (44e10828)'
+cat $PINS | grep 'pin 12 (44e10830)'
+cat $PINS | grep 'pin 14 (44e10838)'
+cat $PINS | grep 'pin 38 (44e10898)'
+cat $PINS | grep 'pin 19 (44e1084c)'
+cat $PINS | grep 'pin 18 (44e10848)'
+cat $PINS | grep 'pin 101 (44e10994)'
+cat $PINS | grep 'pin 100 (44e10990)'

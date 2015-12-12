@@ -109,8 +109,6 @@ class Qb_read_test():
 			newEntries[0] = buffer[0,self.prevBufferLoc: self.bufferLoc]
 			newEntries[1] = buffer[1,self.prevBufferLoc: self.bufferLoc]
 			 
-#			newEntries_0 = buffer[0,self.prevBufferLoc: self.bufferLoc]
-#			newEntries_1 = buffer[1,self.prevBufferLoc: self.bufferLoc]
 		else:
 			print 'backwards from: ' + str(self.prevBufferLoc) +' back to: ' + str(self.bufferLoc)
 			lenNE = MAP_SIZE - self.prevBufferLoc + self.bufferLoc - 4  	
@@ -118,8 +116,6 @@ class Qb_read_test():
 			newEntries[0] = np.concatenate(( buffer[0,self.prevBufferLoc:MAP_SIZE] , buffer[0,4:self.bufferLoc] ) , axis=1)
 			newEntries[1] = np.concatenate(( buffer[1,self.prevBufferLoc:MAP_SIZE] , buffer[1,4:self.bufferLoc] ) , axis=1)
 
-#			newEntries_0 = np.concatenate(( buffer[0,self.prevBufferLoc:4096] , buffer[0,4:self.bufferLoc] ) , axis=1)
-#			newEntries_1 = np.concatenate(( buffer[1,self.prevBufferLoc:4096] , buffer[1,4:self.bufferLoc] ) , axis=1)
 			
 		
 		# update times

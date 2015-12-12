@@ -90,7 +90,7 @@ class QuickBot():
 
     # Encoder counting parameter and variables
     ticksPerTurn = 4  # Number of ticks on encoder disc
-    minPWMThreshold = [60, 60]  # Threshold on the minimum value to turn wheel
+    minPWMThreshold = [45, 45]  # Threshold on the minimum value to turn wheel
 
 
 
@@ -115,8 +115,8 @@ class QuickBot():
     cmdBuffer = ''
 
     # UDP
-    baseIP = '192.168.0.9'
-    robotIP = '192.168.0.22'
+    baseIP = '192.168.7.1'
+    robotIP = '192.168.7.2'
     port = 5005
     robotSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     robotSocket.setblocking(False)
@@ -334,7 +334,7 @@ class QuickBot():
 
 
     def readEncoderValues(self):
-#        print 'readEncodervalues called'
+        print 'readEncodervalues called'
         
         buffer = pp.get_pru_data()
 
@@ -344,14 +344,14 @@ class QuickBot():
 
         # get new entries in buffer
         if self.bufferLoc > self.prevBufferLoc:
-#            print 'forwards from: ' + str(self.prevBufferLoc) +' to: ' + str(self.bufferLoc)
+            print 'forwards from: ' + str(self.prevBufferLoc) +' to: ' + str(self.bufferLoc)
             lenNE = self.bufferLoc - self.prevBufferLoc
             newEntries = np.zeros((2,lenNE))
             newEntries[0] = buffer[0,self.prevBufferLoc: self.bufferLoc]
             newEntries[1] = buffer[1,self.prevBufferLoc: self.bufferLoc]
 
         else:
-#            print 'backwards from: ' + str(self.prevBufferLoc) +' back to: ' + str(self.bufferLoc)
+            print 'backwards from: ' + str(self.prevBufferLoc) +' back to: ' + str(self.bufferLoc)
             lenNE = MAP_SIZE - self.prevBufferLoc + self.bufferLoc - 4
             newEntries = np.zeros((2,lenNE))
             newEntries[0] = np.concatenate(( buffer[0,self.prevBufferLoc:MAP_SIZE] , buffer[0,4:self.bufferLoc] ) , axis=1)
@@ -406,7 +406,7 @@ class QuickBot():
             self.encPos[side] = self.encPos[side] + (ticks * np.sign(self.pwm[side]))   # new  encoder tick position
             self.encVel[side] = self.runningAverage[side] * np.sign(self.pwm[side]) # new encoder tick velocity
 
-#            print 'encPos[{:d}]: {:0.1f}'.format(side,self.encPos[side]) + ' encVel[{:d}]: {:0.1f}'.format(side,self.encVel[side])
+            print 'encPos[{:d}]: {:0.1f}'.format(side,self.encPos[side]) + ' encVel[{:d}]: {:0.1f}'.format(side,self.encVel[side])
 
 
 
